@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:t_server/t_server.dart';
 
 void main() {
@@ -20,6 +22,18 @@ void main() {
   //send file
   TServer.instance.get('/download', (req) {
     tServerSendFile(req, 'your file path');
+  });
+
+  //stream video
+  TServer.instance.get('/stream', (req) async {
+    final path = req.uri.queryParameters['path'] ?? '';
+    //path မရှိရင်
+    if (path.isEmpty) {
+      tServerSend(req, body: '`path` မရှိပါ', httpStatus: HttpStatus.notFound);
+      return;
+    }
+    //send stream
+    await tServerStreamVideo(req, path);
   });
 
   //websocket

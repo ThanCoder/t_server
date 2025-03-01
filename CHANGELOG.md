@@ -1,3 +1,8 @@
+## 1.0.1
+
+## Added
+- video stream `await tServerStreamVideo(req, path)`
+
 ## 1.0.0
 
 - Initial version
