@@ -121,6 +121,10 @@ class TServer {
   Future<void> stopServer({bool force = false}) async {
     try {
       _httpServer.close(force: force);
-    } catch (e) {}
+    } catch (e) {
+      if (onError != null) {
+        onError!(e.toString());
+      }
+    }
   }
 }

@@ -1,5 +1,8 @@
-## 1.0.1
+## 1.0.2
+## Changed
+- onError Event
 
+## 1.0.1
 ## Added
 - video stream `await tServerStreamVideo(req, path)`
 
