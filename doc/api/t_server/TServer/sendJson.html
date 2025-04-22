@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the stopServer method from the TServer class, for the Dart programming language.">
-  <title>stopServer method - TServer class - t_server library - Dart API</title>
+  <meta name="description" content="API docs for the sendJson method from the TServer class, for the Dart programming language.">
+  <title>sendJson method - TServer class - t_server library - Dart API</title>
 
 
   
@@ -27,9 +27,9 @@
     <li><a href="../../index.html">t_server</a></li>
     <li><a href="../../t_server">t_server.dart</a></li>
     <li><a href="../../t_server/TServer-class.html">TServer</a></li>
-    <li class="self-crumb">stopServer method</li>
+    <li class="self-crumb">sendJson static method</li>
   </ol>
-  <div class="self-name">stopServer</div>
+  <div class="self-name">sendJson</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -52,13 +52,15 @@
     data-above-sidebar="t_server&#47;TServer-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-method">stopServer</span> method 
+<h1><span class="kind-method">sendJson</span> static method 
 </h1></div>
 
     <section class="multi-line-signature">
       
-<span class="returntype"><a href="https://api.dart.dev/stable/3.7.0/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-<span class="name ">stopServer</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="stopServer-param-force"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.7.0/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">force</span> = <span class="default-value">false</span>, </span></li>
+<span class="returntype">void</span>
+<span class="name ">sendJson</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="sendJson-param-req"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.7.0/dart-io/HttpRequest-class.html">HttpRequest</a></span> <span class="parameter-name">req</span>, {</span></li>
+<li><span class="parameter" id="sendJson-param-body"><span>required</span> <span class="type-annotation"><a href="https://api.dart.dev/stable/3.7.0/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.dart.dev/stable/3.7.0/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span> <span class="parameter-name">body</span>, </span></li>
+<li><span class="parameter" id="sendJson-param-httpStatus"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.7.0/dart-core/int-class.html">int</a></span> <span class="parameter-name">httpStatus</span> = <span class="default-value">200</span>, </span></li>
 </ol>})
 
       
@@ -70,14 +72,16 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; stopServer({bool force = false}) async {
-  try {
-    _httpServer.close(force: force);
-  } catch (e) {
-    if (onError != null) {
-      onError!(e.toString());
-    }
-  }
+  <pre class="language-dart"><code class="language-dart">static void sendJson(
+  HttpRequest req, {
+  required Map&lt;String, dynamic&gt; body,
+  int httpStatus = 200,
+}) {
+  req.response
+    ..statusCode = httpStatus
+    ..headers.contentType = ContentType.json
+    ..write(body)
+    ..close();
 }</code></pre>
 </section>
 
@@ -94,7 +98,7 @@
     <li><a href="../../index.html">t_server</a></li>
     <li><a href="../../t_server">t_server</a></li>
     <li><a href="../../t_server/TServer-class.html">TServer</a></li>
-    <li class="self-crumb">stopServer method</li>
+    <li class="self-crumb">sendJson static method</li>
 </ol>
 
     <h5>TServer class</h5>

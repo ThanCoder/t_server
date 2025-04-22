@@ -8,20 +8,21 @@ void main() {
 
   //http request
   TServer.instance.get('/', (req) {
-    tServerSend(req, body: 'hello TServer');
+    TServer.send(req, body: 'hello TServer');
   });
   TServer.instance.post('/', (req) {
-    tServerSend(req, body: 'TServer post request');
+    TServer.send(req, body: 'TServer post request');
   });
   TServer.instance.put('/', (req) {
-    tServerSend(req, body: 'TServer put request');
+    TServer.send(req, body: 'TServer put request');
   });
   TServer.instance.delete('/', (req) {
-    tServerSend(req, body: 'TServer delete request');
+    TServer.send(req, body: 'TServer delete request');
   });
   //send file
   TServer.instance.get('/download', (req) {
-    tServerSendFile(req, 'your file path');
+    // TServer.sendFile(req, 'your file path');
+    TServer.sendFile(req, 'your file path');
   });
 
   //stream video
@@ -29,11 +30,11 @@ void main() {
     final path = req.uri.queryParameters['path'] ?? '';
     //path မရှိရင်
     if (path.isEmpty) {
-      tServerSend(req, body: '`path` မရှိပါ', httpStatus: HttpStatus.notFound);
+      TServer.send(req, body: '`path` မရှိပါ', httpStatus: HttpStatus.notFound);
       return;
     }
     //send stream
-    await tServerStreamVideo(req, path);
+    await TServer.sendStreamVideo(req, path);
   });
 
   //websocket

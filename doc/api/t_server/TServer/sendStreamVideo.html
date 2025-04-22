@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the stopServer method from the TServer class, for the Dart programming language.">
-  <title>stopServer method - TServer class - t_server library - Dart API</title>
+  <meta name="description" content="API docs for the sendStreamVideo method from the TServer class, for the Dart programming language.">
+  <title>sendStreamVideo method - TServer class - t_server library - Dart API</title>
 
 
   
@@ -27,9 +27,9 @@
     <li><a href="../../index.html">t_server</a></li>
     <li><a href="../../t_server">t_server.dart</a></li>
     <li><a href="../../t_server/TServer-class.html">TServer</a></li>
-    <li class="self-crumb">stopServer method</li>
+    <li class="self-crumb">sendStreamVideo static method</li>
   </ol>
-  <div class="self-name">stopServer</div>
+  <div class="self-name">sendStreamVideo</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -52,14 +52,15 @@
     data-above-sidebar="t_server&#47;TServer-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-method">stopServer</span> method 
+<h1><span class="kind-method">sendStreamVideo</span> static method 
 </h1></div>
 
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.dart.dev/stable/3.7.0/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-<span class="name ">stopServer</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="stopServer-param-force"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.7.0/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">force</span> = <span class="default-value">false</span>, </span></li>
-</ol>})
+<span class="name ">sendStreamVideo</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="sendStreamVideo-param-req"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.7.0/dart-io/HttpRequest-class.html">HttpRequest</a></span> <span class="parameter-name">req</span>, </span></li>
+<li><span class="parameter" id="sendStreamVideo-param-videoPath"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.7.0/dart-core/String-class.html">String</a></span> <span class="parameter-name">videoPath</span></span></li>
+</ol>)
 
       
 
@@ -70,13 +71,45 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; stopServer({bool force = false}) async {
-  try {
-    _httpServer.close(force: force);
-  } catch (e) {
-    if (onError != null) {
-      onError!(e.toString());
-    }
+  <pre class="language-dart"><code class="language-dart">static Future&lt;void&gt; sendStreamVideo(HttpRequest req, String videoPath) async {
+  final File videoFile = File(videoPath);
+  if (!await videoFile.exists()) {
+    req.response
+      ..statusCode = HttpStatus.notFound
+      ..write(&#39;Video not found&#39;)
+      ..close();
+    return;
+  }
+
+  final int fileSize = await videoFile.length();
+  final HttpResponse response = req.response;
+
+  response.headers.set(HttpHeaders.contentTypeHeader, &#39;video&#47;mp4&#39;);
+  response.headers.set(HttpHeaders.acceptRangesHeader, &#39;bytes&#39;);
+  response.headers.set(&#39;Connection&#39;, &#39;keep-alive&#39;); &#47;&#47; ✅ ADD THIS LINE
+
+  final String? range = req.headers.value(HttpHeaders.rangeHeader);
+  if (range != null &amp;&amp; range.startsWith(&#39;bytes=&#39;)) {
+    final parts = range.substring(6).split(&#39;-&#39;);
+    final int start = int.parse(parts[0]);
+    final int end =
+        parts.length &gt; 1 &amp;&amp; parts[1].isNotEmpty
+            ? int.parse(parts[1])
+            : fileSize - 1;
+    final int contentLength = end - start + 1;
+
+    response
+      ..statusCode = HttpStatus.partialContent
+      ..headers.set(
+        HttpHeaders.contentRangeHeader,
+        &#39;bytes $start-$end&#47;$fileSize&#39;,
+      )
+      ..headers.set(HttpHeaders.contentLengthHeader, contentLength);
+
+    await videoFile.openRead(start, end + 1).pipe(response);
+  } else {
+    response.headers.set(HttpHeaders.contentLengthHeader, fileSize);
+    await videoFile.openRead().pipe(response);
   }
 }</code></pre>
 </section>
@@ -94,7 +127,7 @@
     <li><a href="../../index.html">t_server</a></li>
     <li><a href="../../t_server">t_server</a></li>
     <li><a href="../../t_server/TServer-class.html">TServer</a></li>
-    <li class="self-crumb">stopServer method</li>
+    <li class="self-crumb">sendStreamVideo static method</li>
 </ol>
 
     <h5>TServer class</h5>

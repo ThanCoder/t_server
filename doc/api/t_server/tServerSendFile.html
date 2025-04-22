@@ -57,9 +57,9 @@
 
     <section class="multi-line-signature">
         
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-<span class="name ">tServerSendFile</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="tServerSendFile-param-req"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-io/HttpRequest-class.html">HttpRequest</a></span> <span class="parameter-name">req</span>, </span></li>
-<li><span class="parameter" id="tServerSendFile-param-filePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">filePath</span></span></li>
+<span class="returntype"><a href="https://api.dart.dev/stable/3.7.0/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+<span class="name ">tServerSendFile</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="tServerSendFile-param-req"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.7.0/dart-io/HttpRequest-class.html">HttpRequest</a></span> <span class="parameter-name">req</span>, </span></li>
+<li><span class="parameter" id="tServerSendFile-param-filePath"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.7.0/dart-core/String-class.html">String</a></span> <span class="parameter-name">filePath</span></span></li>
 </ol>)
 
         
@@ -84,10 +84,11 @@
   req.response.headers
     ..set(HttpHeaders.contentTypeHeader, &#39;application&#47;octet-stream&#39;)
     ..set(HttpHeaders.contentLengthHeader, file.lengthSync())
-    ..set(
-      HttpHeaders.contentDisposition,
-      &#39;attachment;filename=${file.path.split(&#39;&#47;&#39;).last}&#39;,
-    );
+  &#47;&#47; ..set(
+  &#47;&#47;   HttpHeaders.contentDisposition,
+  &#47;&#47;   &#39;attachment;filename=${file.path.split(&#39;&#47;&#39;).last}&#39;,
+  &#47;&#47; )
+  ;
   &#47;&#47;send file
   await file.openRead().pipe(req.response);
 }</code></pre>
@@ -117,7 +118,7 @@
 <footer>
   <span class="no-break">
     t_server
-      1.0.1
+      1.0.3
   </span>
   
 </footer>

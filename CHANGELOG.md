@@ -1,4 +1,18 @@
+## 1.0.3
+
+## Added
+- `TServer.send`
+- `TServer.sendJson`
+- `TServer.sendHtml`
+- `TServer.sendFile`
+- `TServer.sendStreamVideo`
+
+## Fixed
+- `tServerSendFile` -> Fixed unicode font error
+- `tServerStreamVideo` -> Fixed
+
 ## 1.0.2
+
 ## Changed
 - onError Event
 

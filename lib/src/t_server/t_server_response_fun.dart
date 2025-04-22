@@ -1,6 +1,8 @@
-//send body
 import 'dart:io';
 
+///
+  /// response send content
+  ///
 void tServerSend(
   HttpRequest req, {
   String body = 'new route',
@@ -10,11 +12,14 @@ void tServerSend(
   contentType ??= ContentType.text;
   req.response
     ..statusCode = httpStatus
+    ..headers.contentType = contentType
     ..write(body)
     ..close();
 }
 
-//send file
+///
+  /// response send file 
+  ///
 Future<void> tServerSendFile(HttpRequest req, String filePath) async {
   final file = File(filePath);
   if (!await file.exists()) {
@@ -28,14 +33,18 @@ Future<void> tServerSendFile(HttpRequest req, String filePath) async {
   req.response.headers
     ..set(HttpHeaders.contentTypeHeader, 'application/octet-stream')
     ..set(HttpHeaders.contentLengthHeader, file.lengthSync())
-    ..set(
-      HttpHeaders.contentDisposition,
-      'attachment;filename=${file.path.split('/').last}',
-    );
+  // ..set(
+  //   HttpHeaders.contentDisposition,
+  //   'attachment;filename=${file.path.split('/').last}',
+  // )
+  ;
   //send file
   await file.openRead().pipe(req.response);
 }
 
+///
+  /// response send stream video
+  ///
 Future<void> tServerStreamVideo(HttpRequest req, String videoPath) async {
   final File videoFile = File(videoPath);
   if (!await videoFile.exists()) {
@@ -51,6 +60,7 @@ Future<void> tServerStreamVideo(HttpRequest req, String videoPath) async {
 
   response.headers.set(HttpHeaders.contentTypeHeader, 'video/mp4');
   response.headers.set(HttpHeaders.acceptRangesHeader, 'bytes');
+  response.headers.set('Connection', 'keep-alive'); // ✅ ADD THIS LINE
 
   final String? range = req.headers.value(HttpHeaders.rangeHeader);
   if (range != null && range.startsWith('bytes=')) {
