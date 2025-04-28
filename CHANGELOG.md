@@ -1,3 +1,15 @@
+## 1.0.4
+
+## Added 
+- `TServer.sendImage`
+- `TServer.sendVideo`
+
+## Fixed
+- `TServer.sendJson`-> fixed
+
+## Changed
+- `TServer.sendFile` -> auto send file mime type
+
 ## 1.0.3
 
 ## Added

@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:mime/mime.dart';
+
 import 'index.dart';
 
 ///
@@ -11,12 +13,14 @@ class TServer {
   ///
   static final TServer instance = TServer._();
   TServer._();
+
   ///
   /// singleton pattern
   ///
   factory TServer() => instance;
 
   late HttpServer _httpServer;
+
   ///
   /// all error listener
   ///
@@ -88,7 +92,7 @@ class TServer {
     );
   }
 
-   ///
+  ///
   ///listener for route DELETE Method
   ///
   void delete(String url, void Function(HttpRequest req) onReq) {
@@ -97,7 +101,7 @@ class TServer {
     );
   }
 
-   ///
+  ///
   ///listener for route PUT Method
   ///
   void put(String url, void Function(HttpRequest req) onReq) {
@@ -175,7 +179,7 @@ class TServer {
   ///
   static void sendJson(
     HttpRequest req, {
-    required Map<String, dynamic> body,
+    required String body,
     int httpStatus = 200,
   }) {
     req.response
@@ -201,9 +205,44 @@ class TServer {
   }
 
   ///
-  /// response send file 
+  /// response send file
+  /// contentTypeHeader == null -> auto mime type
   ///
-  static Future<void> sendFile(HttpRequest req, String filePath) async {
+  static Future<void> sendFile(
+    HttpRequest req,
+    String filePath, {
+    String? contentTypeHeader,
+  }) async {
+    final file = File(filePath);
+    if (!await file.exists()) {
+      req.response
+        ..statusCode = HttpStatus.notFound
+        ..write('File Not Found')
+        ..close();
+      return;
+    }
+    if (contentTypeHeader == null) {
+      final mime = lookupMimeType(filePath) ?? 'application/octet-stream';
+      contentTypeHeader = mime;
+    }
+
+    //file ရှိရင်
+    req.response.headers
+      ..set(HttpHeaders.contentTypeHeader, contentTypeHeader)
+      ..set(HttpHeaders.contentLengthHeader, file.lengthSync())
+    // ..set(
+    //   HttpHeaders.contentDisposition,
+    //   'attachment;filename=${file.path.split('/').last}',
+    // )
+    ;
+    //send file
+    await file.openRead().pipe(req.response);
+  }
+
+  ///
+  /// response send image
+  ///
+  static Future<void> sendImage(HttpRequest req, String filePath) async {
     final file = File(filePath);
     if (!await file.exists()) {
       req.response
@@ -214,13 +253,28 @@ class TServer {
     }
     //file ရှိရင်
     req.response.headers
-      ..set(HttpHeaders.contentTypeHeader, 'application/octet-stream')
-      ..set(HttpHeaders.contentLengthHeader, file.lengthSync())
-    // ..set(
-    //   HttpHeaders.contentDisposition,
-    //   'attachment;filename=${file.path.split('/').last}',
-    // )
-    ;
+      ..set(HttpHeaders.contentTypeHeader, 'image/png')
+      ..set(HttpHeaders.contentLengthHeader, file.lengthSync());
+    //send file
+    await file.openRead().pipe(req.response);
+  }
+
+  ///
+  /// response send video
+  ///
+  static Future<void> sendVideo(HttpRequest req, String filePath) async {
+    final file = File(filePath);
+    if (!await file.exists()) {
+      req.response
+        ..statusCode = HttpStatus.notFound
+        ..write('File Not Found')
+        ..close();
+      return;
+    }
+    //file ရှိရင်
+    req.response.headers
+      ..set(HttpHeaders.contentTypeHeader, 'video/mp4')
+      ..set(HttpHeaders.contentLengthHeader, file.lengthSync());
     //send file
     await file.openRead().pipe(req.response);
   }

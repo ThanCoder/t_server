@@ -1,10 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:t_server/t_server.dart';
 
 void main() {
   TServer.instance.startServer(port: 3000);
-  print('server is running on port 3000');
+  print('server is running on port http://localhost:3000');
 
   //http request
   TServer.instance.get('/', (req) {
@@ -35,6 +36,29 @@ void main() {
     }
     //send stream
     await TServer.sendStreamVideo(req, path);
+  });
+  //send json
+  TServer.instance.get('/json', (req) {
+    TServer.sendJson(req, body: jsonEncode({'res': 'hello'}));
+  });
+  TServer.instance.get('/image', (req) {
+    TServer.sendImage(
+      req,
+      '/home/thancoder/Pictures/DALL·E 2024-11-30 04.53.03 .webp',
+    );
+  });
+  TServer.instance.get('/video', (req) {
+    TServer.sendVideo(
+      req,
+      '/home/thancoder/Videos/AMAZING DRIFTING SKILLS.mp4',
+    );
+  });
+
+  TServer.instance.get('/file', (req) {
+    TServer.sendFile(
+      req,
+      '/home/thancoder/Pictures/DALL·E 2024-11-30 04.53.03 .webp',
+    );
   });
 
   //websocket
