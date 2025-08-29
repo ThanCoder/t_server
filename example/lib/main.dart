@@ -14,11 +14,10 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with TServerListener {
   @override
   void initState() {
-    TServer.instance.startListen(port: 8080);
-
+    TServer.instance.addListener(this);
     super.initState();
     init();
   }
@@ -26,10 +25,13 @@ class _MyAppState extends State<MyApp> {
   @override
   void dispose() {
     TServer.instance.stop(force: true);
+    TServer.instance.removeListener(this);
     super.dispose();
   }
 
   void init() async {
+    TServer.instance.startListen(port: 8080);
+
     TServer.instance.get('/', (req) {
       req.sendHtml('<h1>Hello TServer</h1>');
     });
@@ -102,15 +104,23 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Plugin example app')),
-        body: Center(child: Text('')),
+        body: Placeholder(),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            TServer.instance.stop();
+          },
+        ),
       ),
     );
+  }
+
+  @override
+  void onServerStatusChanged(bool isServerRunning) {
+    print('isServerRunning: $isServerRunning');
   }
 }

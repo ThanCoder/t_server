@@ -1,3 +1,10 @@
+## 2.1.0
+
+## Added
+
+- `TServerListener`
+- `server status`
+
 ## 2.0.0
 
 ## Changed
