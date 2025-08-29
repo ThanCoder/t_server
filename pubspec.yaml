@@ -1,6 +1,7 @@
 name: t_server
 description: TServer package for dart core lib and is support http,websocket
-version: 1.0.4
+version: 2.0.0
+homepage: https://github.com/ThanCoder/t_server
 repository: https://github.com/ThanCoder/t_server
 
 environment:
@@ -9,7 +10,26 @@ environment:
 # Add regular dependencies here.
 dependencies:
   mime: ^2.0.0
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.1.8
 # path: ^1.8.0
 dev_dependencies:
   lints: ^5.0.0
   test: ^1.24.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        default_package: t_server
+      ios:
+        default_package: t_server
+      web:
+        default_package: t_server
+      windows:
+        default_package: t_server
+      macos:
+        default_package: t_server
+      linux:
+        default_package: t_server

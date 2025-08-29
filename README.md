@@ -1,4 +1,4 @@
-## TServer Dart Core Lib
+# TServer Dart Core Lib
 
 ## Supported
 
@@ -8,82 +8,90 @@
 ## Example
 
 ```dart
-TServer.instance.startServer(port: 3000);
-  print('server is running on port http://localhost:3000');
+//init
+TServer.instance.startListen(port: 8080);
+//dispose
+TServer.instance.stop(force: true);
 
-  //http request
-  TServer.instance.get('/', (req) {
-    TServer.send(req, body: 'hello TServer');
-  });
-  TServer.instance.post('/', (req) {
-    TServer.send(req, body: 'TServer post request');
-  });
-  TServer.instance.put('/', (req) {
-    TServer.send(req, body: 'TServer put request');
-  });
-  TServer.instance.delete('/', (req) {
-    TServer.send(req, body: 'TServer delete request');
-  });
-  //send file
-  TServer.instance.get('/download', (req) {
-    // TServer.sendFile(req, 'your file path');
-    TServer.sendFile(req, 'your file path');
-  });
+TServer.instance.get('/', (req) {
+  req.sendHtml('<h1>Hello TServer</h1>');
+});
+TServer.instance.get('/text', (req) {
+  req.sendText('Hello TServer text');
+});
+TServer.instance.get('/json', (req) {
+  req.sendJson(jsonEncode({'res': 'hello TServer json result'}));
+});
+TServer.instance.get('/download', (req) {
+  // download/?path=[path]
+  final path = req.getQueryParameters['path'] ?? '';
+  req.sendFile(path);
+});
+TServer.instance.get('/stream', (req) {
+  // download/?path=[path]
+  final path = req.getQueryParameters['path'] ?? '';
+  req.sendVideoStream(path);
+});
+// post method
+TServer.instance.post('/post', (req) async {
+  final body = await req.getBody();
+  debugPrint(body.toString());
+});
+TServer.instance.put('/put', (req) async {
+  final body = await req.getBody();
+  debugPrint(body.toString());
+});
+TServer.instance.delete('/delete', (req) async {
+  // delete?id=[id]
+  final id = req.getQueryParameters['id'] ?? '';
+  debugPrint(id);
+});
+```
 
-  //stream video
-  TServer.instance.get('/stream', (req) async {
-    final path = req.uri.queryParameters['path'] ?? '';
-    //path မရှိရင်
-    if (path.isEmpty) {
-      TServer.send(req, body: '`path` မရှိပါ', httpStatus: HttpStatus.notFound);
-      return;
-    }
-    //send stream
-    await TServer.sendStreamVideo(req, path);
-  });
-  //send json
-  TServer.instance.get('/json', (req) {
-    TServer.sendJson(req, body: jsonEncode({'res': 'hello'}));
-  });
-  TServer.instance.get('/image', (req) {
-    TServer.sendImage(
-      req,
-      '/home/thancoder/Pictures/DALL·E 2024-11-30 04.53.03 .webp',
-    );
-  });
-  TServer.instance.get('/video', (req) {
-    TServer.sendVideo(
-      req,
-      '/home/thancoder/Videos/AMAZING DRIFTING SKILLS.mp4',
-    );
-  });
+## WebSocket
 
-  TServer.instance.get('/file', (req) {
-    TServer.sendFile(
-      req,
-      '/home/thancoder/Pictures/DALL·E 2024-11-30 04.53.03 .webp',
-    );
-  });
+```dart
+TServer.instance.onSocketListen((req, socket) {
+  // client connected
+  debugPrint('client connected');
+  socket.listen(
+    (data) {
+      // client send data
+      debugPrint('client message: [$data]');
+    },
+    onDone: () {
+      // client leave
+      debugPrint('client leave');
+    },
+  );
+});
+```
 
-  //websocket
-  TServer.instance.onSocket('/ws', (http, socket) {
-    socket.add('hello from Server');
-    socket.listen(
-      //listen on client
-      (data) {
-        //send client -> client ကိုပြန်ပို့မယ်
-        socket.add('from Server - your text -> `$data`');
-        //client text
-        print(data);
-      },
-      //client disconneted
-      onDone: () {
-        print('client disconncted');
-      },
-      //on error
-      onError: (err) {
-        print('socket error ${err.toString()}');
-      },
-    );
-  });
+## Upload File From Client User
+
+```dart
+// client file upload
+TServer.instance.post('/upload', (req) {
+  req.uploadFile('save dir path');
+});
+
+//from client user
+final formData = FormData.fromMap({
+  'file': await MultipartFile.fromFile(path, filename: path.getName()),
+});
+
+await dio.post(
+  "${widget.hostUrl}/upload",
+  data: formData,
+  options: Options(
+    contentType: 'multipart/form-data',
+    sendTimeout: Duration(
+      hours: 1,
+    ), // 2GB ဆိုတာကြောင့် timeout ကြီးကြီးထား
+    receiveTimeout: Duration(hours: 1),
+  ),
+  onSendProgress: (sent, total) {
+  },
+)
+
 ```
