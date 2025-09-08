@@ -97,6 +97,8 @@ class TServer {
   }
 
   void dispose() {
+    _server?.close(force: true);
+    _isServerRunning = false;
     _routes['GET']!.clear();
     _routes['POST']!.clear();
     _routes['PUT']!.clear();

@@ -1,3 +1,7 @@
+## 2.2.0
+
+- Add `Partial Download 206`
+
 ## 2.1.0
 
 ## Added

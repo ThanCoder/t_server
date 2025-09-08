@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/widgets.dart';
 import 'package:mime/mime.dart';
+import 'package:t_server/core/t_logger.dart';
 
 import 't_encoder.dart';
 
@@ -59,22 +59,61 @@ extension HttpExtensions on HttpRequest {
 
   ///
   /// send file
+  /// partial download 206
   ///
   Future<void> sendFile(String filePath) async {
     try {
       final file = File(filePath);
       final name = file.path.split('/').last;
+      final fileLength = file.lengthSync();
 
       if (file.existsSync()) {
-        response.headers.set('Content-Type', 'text/plain; charset=utf-8');
-        response.headers.set(
-          'Content-Disposition',
-          'attachment; filename="${TEncoder.encodeRFC5987(name)}"',
-        );
-        response.headers.set('Content-Length', file.statSync().size);
+        final rangeHeader = headers.value(HttpHeaders.rangeHeader);
+        if (rangeHeader != null) {
+          // partial download 206 အတွက်
+          // Example: Range: bytes=1000-
+          final match = RegExp(r"bytes=(\d+)-(\d*)").firstMatch(rangeHeader);
+          final start = int.parse(match!.group(1)!);
+          final end = match.group(2)!.isNotEmpty
+              ? int.parse(match.group(2)!)
+              : fileLength - 1;
 
-        // UTF-8 stream နဲ့ pipe လုပ်
-        await file.openRead().pipe(response);
+          final chunkSize = end - start + 1;
+
+          response
+            ..statusCode = HttpStatus.partialContent
+            ..headers.add(
+              HttpHeaders.contentTypeHeader,
+              "application/octet-stream",
+            )
+            ..headers.add(HttpHeaders.acceptRangesHeader, "bytes")
+            ..headers.add(
+              HttpHeaders.contentRangeHeader,
+              "bytes $start-$end/$fileLength",
+            )
+            ..headers.add(HttpHeaders.contentLengthHeader, chunkSize)
+            ..headers.set(
+              'Content-Disposition',
+              'attachment; filename="${TEncoder.encodeRFC5987(name)}"',
+            );
+
+          final raf = file.openSync();
+          raf.setPositionSync(start);
+          response.add(raf.readSync(chunkSize));
+          await response.close();
+          raf.close();
+        } else {
+          // full file send
+          response.headers.set('Content-Type', 'text/plain; charset=utf-8');
+          response.headers.set(
+            'Content-Disposition',
+            'attachment; filename="${TEncoder.encodeRFC5987(name)}"',
+          );
+          response.headers.set('Content-Length', fileLength);
+
+          // UTF-8 stream နဲ့ pipe လုပ်
+          await file.openRead().pipe(response);
+        }
       } else {
         response
           ..statusCode = HttpStatus.notFound
@@ -82,7 +121,7 @@ extension HttpExtensions on HttpRequest {
           ..close();
       }
     } catch (e) {
-      debugPrint(e.toString());
+      TLogger.instance.showLog(e.toString(), tag: 'sendFile');
       response
         ..statusCode = HttpStatus.internalServerError
         ..write('Server Error')
@@ -129,8 +168,10 @@ extension HttpExtensions on HttpRequest {
           final sink = file.openWrite();
           await part.pipe(sink);
           await sink.close();
-
-          debugPrint("Uploaded file: ${file.path}");
+          TLogger.instance.showLog(
+            "Uploaded file: ${file.path}",
+            tag: 'uploadFile',
+          );
         }
       }
 
@@ -139,7 +180,7 @@ extension HttpExtensions on HttpRequest {
         ..write('Upload successful')
         ..close();
     } catch (e) {
-      debugPrint(e.toString());
+      TLogger.instance.showLog(e.toString(), tag: 'uploadFile');
       response
         ..statusCode = HttpStatus.internalServerError
         ..write('Server Error')
@@ -188,7 +229,7 @@ extension HttpExtensions on HttpRequest {
       final stream = file.openRead(start, end + 1);
       await stream.pipe(response);
     } catch (e) {
-      debugPrint(e.toString());
+      TLogger.instance.showLog(e.toString(), tag: 'sendVideoStream');
       response
         ..statusCode = HttpStatus.internalServerError
         ..write('Server Error')
