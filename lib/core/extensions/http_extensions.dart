@@ -2,40 +2,50 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:mime/mime.dart';
+import 'package:t_server/core/index.dart';
 import 'package:t_server/core/t_logger.dart';
-
-import 't_encoder.dart';
 
 extension HttpExtensions on HttpRequest {
   ///
   /// send text String
   ///
-  void sendText(String text) {
-    response
-      ..headers.contentType = ContentType.text
-      ..write(text)
-      ..close();
+  Future<void> send(
+    dynamic text, {
+    ContentType? contentType,
+    int statusCode = HttpStatus.ok,
+  }) async {
+    final res = response
+      ..headers.contentType = contentType ?? ContentType.text
+      ..statusCode = statusCode
+      ..write(text);
+    await res.close();
   }
+
+  ///
+  /// send text String
+  ///
+  Future<void> sendText(String text) async => sendText(text);
 
   ///
   /// send html String
   ///
-  void sendHtml(String html) {
-    response
-      ..headers.contentType = ContentType.html
-      ..write(html)
-      ..close();
-  }
+  Future<void> sendHtml(String html) async => send(
+    html,
+    contentType: ContentType.html,
+    statusCode: HttpStatus.notFound,
+  );
+
+  Future<void> sendNotFoundHtml({String? text}) async => send(
+    text ?? '<h1>404 Not Found</h1>',
+    contentType: ContentType.html,
+    statusCode: HttpStatus.notFound,
+  );
 
   ///
   /// send json encoded String
   ///
-  void sendJson(String jsonStr) {
-    response
-      ..headers.contentType = ContentType.json
-      ..write(jsonStr)
-      ..close();
-  }
+  Future<void> sendJson(String jsonStr) async =>
+      send(jsonStr, contentType: ContentType.json);
 
   ///
   /// `/?path=[path]` query parameters
@@ -44,10 +54,10 @@ extension HttpExtensions on HttpRequest {
     return uri.queryParameters;
   }
 
-  // Map<String, dynamic> getParams() {
-  //   // final path = uri.queryParameters;
-  //   return {};
-  // }
+  Map<String, dynamic> get getParams {
+    final params = serverParams[uri.path];
+    return params ?? {};
+  }
 
   ///
   /// get request body -> map
