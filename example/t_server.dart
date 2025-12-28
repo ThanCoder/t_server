@@ -16,7 +16,7 @@ void main() async {
   });
 
   // HTTP GET route with path param
-  router.get('/download/:name', (req) {
+  router.get('/download/:name', (req) async {
     final name = req.getParams['name'];
     req.sendText('Download file: $name');
   });
@@ -41,5 +41,4 @@ void main() async {
       print('Server Running On: http://localhost:${server.port}');
     },
   );
-  // TServer.instance.startListen();
 }

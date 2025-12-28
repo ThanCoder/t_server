@@ -8,90 +8,65 @@
 ## Example
 
 ```dart
-//init
-TServer.instance.startListen(port: 8080);
-//dispose
-TServer.instance.stop(force: true);
+final server = TServer();
+final router = TRouter();
+final socketRouter = TSocketRouter();
 
-TServer.instance.get('/', (req) {
-  req.sendHtml('<h1>Hello TServer</h1>');
-});
-TServer.instance.get('/text', (req) {
-  req.sendText('Hello TServer text');
-});
-TServer.instance.get('/json', (req) {
-  req.sendJson(jsonEncode({'res': 'hello TServer json result'}));
-});
-TServer.instance.get('/download', (req) {
-  // download/?path=[path]
-  final path = req.getQueryParameters['path'] ?? '';
-  req.sendFile(path);
-});
-TServer.instance.get('/stream', (req) {
-  // download/?path=[path]
-  final path = req.getQueryParameters['path'] ?? '';
-  req.sendVideoStream(path);
-});
-// post method
-TServer.instance.post('/post', (req) async {
-  final body = await req.getBody();
-  debugPrint(body.toString());
-});
-TServer.instance.put('/put', (req) async {
-  final body = await req.getBody();
-  debugPrint(body.toString());
-});
-TServer.instance.delete('/delete', (req) async {
-  // delete?id=[id]
-  final id = req.getQueryParameters['id'] ?? '';
-  debugPrint(id);
-});
-```
-
-## WebSocket
-
-```dart
-TServer.instance.onSocketListen((req, socket) {
-  // client connected
-  debugPrint('client connected');
-  socket.listen(
-    (data) {
-      // client send data
-      debugPrint('client message: [$data]');
-    },
-    onDone: () {
-      // client leave
-      debugPrint('client leave');
-    },
-  );
-});
-```
-
-## Upload File From Client User
-
-```dart
-// client file upload
-TServer.instance.post('/upload', (req) {
-  req.uploadFile('save dir path');
+router.get('/', (req) {
+  req.sendHtml('<h1>index Page</h1>');
 });
 
-//from client user
-final formData = FormData.fromMap({
-  'file': await MultipartFile.fromFile(path, filename: path.getName()),
+router.get('/index/:name', (req) {
+  req.sendHtml('<h1>index Page Name: ${req.getParams['name']}</h1>');
 });
 
-await dio.post(
-  "${widget.hostUrl}/upload",
-  data: formData,
-  options: Options(
-    contentType: 'multipart/form-data',
-    sendTimeout: Duration(
-      hours: 1,
-    ), // 2GB ဆိုတာကြောင့် timeout ကြီးကြီးထား
-    receiveTimeout: Duration(hours: 1),
-  ),
-  onSendProgress: (sent, total) {
+// HTTP GET route with path param
+router.get('/download/:name', (req) {
+  final name = req.getParams['name'];
+  req.sendText('Download file: $name');
+});
+
+router.get('/close-server', (req) async {
+  await req.sendHtml('<h1>Closed Server</h1>');
+  await server.stop(force: true);
+});
+
+// WebSocket route
+socketRouter.add((req, socket) {
+  socket.add('Hello WebSocket!');
+});
+
+server.setRouter(router);
+server.setSocketRouter(socketRouter);
+
+await server.start(
+  'localhost',
+  8080,
+  onStartServer: () {
+    print('Server Running On: http://localhost:${server.port}');
   },
-)
+);
+```
 
+## Server Get Body
+
+```dart
+// /download/:name
+Map<String, dynamic> params =  req.getParams;
+// /download?name=thancoder
+Map<String, dynamic> query = req.getQueryParameters;
+// client send body
+final body = await req.getBody();
+```
+
+## Server HttpRequest
+
+```dart
+req.sendHtml('<h1>index Page Name: ${req.getParams['name']}</h1>');
+req.send('dynamic');
+req.sendHtml('[html]');
+req.sendJson('[jsonStr]');
+req.sendText('[text]');
+req.sendFile('[filePath]');
+req.sendVideoStream('[filePath]');
 ```
