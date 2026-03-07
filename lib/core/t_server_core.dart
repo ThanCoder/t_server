@@ -34,6 +34,41 @@ class TServer {
     _socketRouter = socketRouter;
   }
 
+  String? _host;
+
+  ///
+  /// ### Your Start Server [host address]
+  ///
+  String? get host => _host ?? '';
+
+  ///
+  /// ### Server is Running
+  ///
+  bool get isServerRunning {
+    try {
+      _server;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  ///
+  /// ### Your Start Server [PORT]
+  ///
+  int get port {
+    if (_server != null) return _server!.port;
+    return -1;
+  }
+
+  ///
+  /// ### Core HttpServer Class
+  ///
+  HttpServer? get httpServer => _server;
+
+  ///
+  /// ### init Server
+  ///
   Future<void> start(
     String host,
     int port, {
@@ -42,6 +77,7 @@ class TServer {
     bool shared = false,
     void Function()? onStartServer,
   }) async {
+    _host = host;
     _server = await HttpServer.bind(
       host,
       port,
@@ -80,8 +116,7 @@ class TServer {
   }
 
   Future<void> stop({bool force = false}) async {
+    if (!isServerRunning) return;
     await _server?.close(force: force);
   }
-
-  int get port => _server!.port;
 }
