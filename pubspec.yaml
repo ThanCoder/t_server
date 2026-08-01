@@ -5,7 +5,7 @@ homepage: https://github.com/ThanCoder/t_server
 repository: https://github.com/ThanCoder/t_server
 
 environment:
-  sdk: ^3.8.1
+  sdk: ^3.12.0
 
 # Add regular dependencies here.
 dependencies:

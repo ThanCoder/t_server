@@ -1,44 +1,35 @@
-import 'package:t_server/core/index.dart';
-import 'package:t_server/core/routers/t_router.dart';
-import 'package:t_server/core/routers/t_socket_handler.dart';
+import 'package:t_server/core/router/t_router.dart';
+import 'package:t_server/t_server.dart';
 
 void main() async {
-  final server = TServer();
-  final router = TRouter();
-  final socketRouter = TSocketRouter();
+  final r = TRouter();
+  final s = TServer(router: r);
 
-  router.get('/', (req) {
-    req.sendHtml('<h1>index Page</h1>');
+  r.get('/', (ctx) async {
+    ctx.request.response.text('Home');
   });
 
-  router.get('/index/:name', (req) {
-    req.sendHtml('<h1>index Page Name: ${req.getParams['name']}</h1>');
+  r.get('/about', (ctx) async {
+    ctx.request.response.text('About');
+  });
+  r.get('/user/:id', (ctx) async {
+    final id = ctx.params['id'];
+
+    await ctx.request.response.text('User ID: $id');
   });
 
-  // HTTP GET route with path param
-  router.get('/download/:name', (req) async {
-    final name = req.getParams['name'];
-    req.sendText('Download file: $name');
+  r.get('/user/:id/post/:postId', (ctx) async {
+    final id = ctx.params['id'];
+    final postId = ctx.params['postId'];
+
+    await ctx.request.response.text('User: $id, Post: $postId');
+  });
+ r.get('/user', (ctx) async {
+    await ctx.request.response.text('i am get method');
+  });
+  r.post('/user', (ctx) async {
+    await ctx.request.response.text('i am post method');
   });
 
-  router.get('/close-server', (req) async {
-    await req.sendHtml('<h1>Closed Server</h1>');
-    await server.stop(force: true);
-  });
-
-  // WebSocket route
-  socketRouter.add((req, socket) {
-    socket.add('Hello WebSocket!');
-  });
-
-  server.setRouter(router);
-  server.setSocketRouter(socketRouter);
-
-  await server.start(
-    'localhost',
-    8080,
-    onStartServer: () {
-      print('Server Running On: http://localhost:${server.port}');
-    },
-  );
+  await s.start();
 }
