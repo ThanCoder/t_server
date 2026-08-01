@@ -1,69 +1,145 @@
 import 'package:t_server/core/method/t_method.dart';
+import 'package:t_server/core/middleware/t_middleware.dart';
 import 'package:t_server/core/router/route_handler.dart';
+import 'package:t_server/core/router/route_utils.dart';
 import 'package:t_server/core/router/t_route.dart';
-import 'package:t_server/core/router/t_route_match.dart';
+import 'package:t_server/core/router/route_result.dart';
 
 class TRouter {
   final List<TRoute> _routes = [];
 
-  void _add(TMethod method, String path, THandler handler) {
-    _routes.add(TRoute(method: method, path: path, handler: handler));
-  }
-
   /// GET
-  void get(String path, THandler handler) {
-    _add(TMethod.get, path, handler);
+  void get(
+    String path,
+    THandler handler, {
+    List<TMiddleware> middlewares = const [],
+  }) {
+    _add(TMethod.get, path, handler, middlewares: middlewares);
   }
 
   /// POST
-  void post(String path, THandler handler) {
-    _add(TMethod.post, path, handler);
+  void post(
+    String path,
+    THandler handler, {
+    List<TMiddleware> middlewares = const [],
+  }) {
+    _add(TMethod.post, path, handler, middlewares: middlewares);
   }
 
   /// PUT
-  void put(String path, THandler handler) {
-    _add(TMethod.put, path, handler);
+  void put(
+    String path,
+    THandler handler, {
+    List<TMiddleware> middlewares = const [],
+  }) {
+    _add(TMethod.put, path, handler, middlewares: middlewares);
   }
 
   /// DELETE
-  void delete(String path, THandler handler) {
-    _add(TMethod.delete, path, handler);
+  void delete(
+    String path,
+    THandler handler, {
+    List<TMiddleware> middlewares = const [],
+  }) {
+    _add(TMethod.delete, path, handler, middlewares: middlewares);
   }
 
   /// HEAD
-  void head(String path, THandler handler) {
-    _add(TMethod.head, path, handler);
+  void head(
+    String path,
+    THandler handler, {
+    List<TMiddleware> middlewares = const [],
+  }) {
+    _add(TMethod.head, path, handler, middlewares: middlewares);
   }
 
   /// OPTIONS
-  void options(String path, THandler handler) {
-    _add(TMethod.options, path, handler);
+  void options(
+    String path,
+    THandler handler, {
+    List<TMiddleware> middlewares = const [],
+  }) {
+    _add(TMethod.options, path, handler, middlewares: middlewares);
   }
 
   /// PATH
-  void patch(String path, THandler handler) {
-    _add(TMethod.patch, path, handler);
+  void patch(
+    String path,
+    THandler handler, {
+    List<TMiddleware> middlewares = const [],
+  }) {
+    _add(TMethod.patch, path, handler, middlewares: middlewares);
   }
 
   /// CONNECT
-  void connect(String path, THandler handler) {
-    _add(TMethod.connect, path, handler);
+  void connect(
+    String path,
+    THandler handler, {
+    List<TMiddleware> middlewares = const [],
+  }) {
+    _add(TMethod.connect, path, handler, middlewares: middlewares);
   }
 
   /// TRACE
-  void trace(String path, THandler handler) {
-    _add(TMethod.trace, path, handler);
+  void trace(
+    String path,
+    THandler handler, {
+    List<TMiddleware> middlewares = const [],
+  }) {
+    _add(TMethod.trace, path, handler, middlewares: middlewares);
   }
 
-  TRouteMatch? find(TMethod method, String path) {
-    for (var route in _routes) {
-      ///method မတူရင် ကျော်မယ်
+  void _add(
+    TMethod method,
+    String path,
+    THandler handler, {
+    List<TMiddleware> middlewares = const [],
+  }) {
+    final normalized = RouteUtils.normalizePath(path);
+
+    for (final route in _routes) {
       if (route.method != method) {
         continue;
       }
-      final res = route.match(path);
-      if (res != null) {
-        return TRouteMatch(route, res);
+      if (route.normalizedPath == normalized) {
+        throw StateError('Duplicate route: ${method.name} $path');
+      }
+    }
+
+    _routes.add(
+      TRoute(
+        method: method,
+        path: path,
+        handler: handler,
+        middlewares: middlewares,
+      ),
+    );
+  }
+
+  RouteResult? find(TMethod method, String path) {
+    final routes = _routes.where((route) => route.method == method).toList();
+
+    routes.sort((a, b) => b.score.compareTo(a.score));
+
+    // 1. Static route
+    for (final route in routes) {
+      if (!route.isDynamic) {
+        final params = route.match(path);
+
+        if (params != null) {
+          return RouteResult(route, params);
+        }
+      }
+    }
+
+    // 2. Dynamic route
+    for (final route in routes) {
+      if (route.isDynamic) {
+        final params = route.match(path);
+
+        if (params != null) {
+          return RouteResult(route, params);
+        }
       }
     }
 

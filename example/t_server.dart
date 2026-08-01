@@ -1,35 +1,33 @@
+import 'dart:io';
+
+import 'package:t_server/core/context/t_context.dart';
 import 'package:t_server/core/router/t_router.dart';
 import 'package:t_server/t_server.dart';
 
 void main() async {
   final r = TRouter();
-  final s = TServer(router: r);
+  final s = TServer();
 
-  r.get('/', (ctx) async {
-    ctx.request.response.text('Home');
-  });
+  s.setRouter(r);
 
-  r.get('/about', (ctx) async {
-    ctx.request.response.text('About');
-  });
-  r.get('/user/:id', (ctx) async {
-    final id = ctx.params['id'];
-
-    await ctx.request.response.text('User ID: $id');
-  });
-
-  r.get('/user/:id/post/:postId', (ctx) async {
-    final id = ctx.params['id'];
-    final postId = ctx.params['postId'];
-
-    await ctx.request.response.text('User: $id, Post: $postId');
-  });
- r.get('/user', (ctx) async {
-    await ctx.request.response.text('i am get method');
-  });
-  r.post('/user', (ctx) async {
-    await ctx.request.response.text('i am post method');
+  r.get('/file', (ctx) async {
+    final file = File('/home/thancoder/Videos/Zootopia.2016.720p.BluRay.mp4');
+    await ctx.response.file(file, contentType: TContentType.mp4);
   });
 
   await s.start();
+  print('Server running on http://${s.getAddress!.host}:${s.port}');
+}
+
+class UserAuth extends TMiddleware {
+  @override
+  Future<void> handle(TContext ctx, TNext next) async {
+    final key = ctx.query['key'];
+    if (key == null) {
+      await ctx.response.text('login failed');
+      return;
+    }
+    ctx.state['key'] = key;
+    await next();
+  }
 }
