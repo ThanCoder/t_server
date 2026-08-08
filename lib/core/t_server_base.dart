@@ -122,6 +122,7 @@ class TServer {
   Future<void> stop({bool force = false}) async {
     if (!_isOpened) return;
     await _server?.close(force: force);
+    _isOpened = false;
     _server = null;
   }
   //****************Http Request Handler*********************** */
