@@ -18,7 +18,7 @@ abstract class ITResponse {
   });
 }
 
-class TResponse extends ITResponse {
+class TResponse extends ITResponse with DownloadHandler, StreamHandler {
   @override
   final HttpResponse _raw;
   @override
