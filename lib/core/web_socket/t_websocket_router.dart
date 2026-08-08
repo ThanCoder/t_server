@@ -5,6 +5,10 @@ import 'package:t_server/core/web_socket/t_websocket_route.dart';
 class TWebSocketRouter {
   final List<TWebsocketRoute> _routes = [];
 
+  void clearRoutes() {
+    _routes.clear();
+  }
+
   void route(
     String path,
     TWebSocketHandler handler, {

@@ -8,6 +8,10 @@ import 'package:t_server/core/http_server/router/route_result.dart';
 class THttpRouter {
   final List<TRoute> _routes = [];
 
+  void clearRoutes() {
+    _routes.clear();
+  }
+
   /// GET
   void get(
     String path,
