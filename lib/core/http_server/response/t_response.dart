@@ -29,13 +29,13 @@ class TResponse extends ITResponse {
   bool get isClosed => _closed;
 
   /// ### Send Text
-  /// HttpStatus.ok
+  /// await ctx.request.response.text('text');
   Future<void> text(String value, {int statusCode = HttpStatus.ok}) {
     return send(value, contentType: ContentType.text, statusCode: statusCode);
   }
 
   /// ### Send Html
-  /// `await ctx.request.response.json('<h1>hello user</h1>');`
+  /// `await ctx.request.response.html('<h1>hello user</h1>');`
   Future<void> html(String value, {int statusCode = HttpStatus.ok}) {
     return send(value, contentType: ContentType.html, statusCode: statusCode);
   }
