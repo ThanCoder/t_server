@@ -2,7 +2,7 @@ name: t_server
 description: TServer package for dart core lib and is support http,websocket
 version: 3.1.0
 homepage: https://github.com/ThanCoder/t_server
-repository: https://github.com/ThanCoder/t_server
+repository: https://github.com/ThanCoder/t_server.git
 
 environment:
   sdk: ^3.12.0
