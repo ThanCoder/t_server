@@ -3,7 +3,8 @@ import 'package:t_server/core/http_server/request/t_multipart_form.dart';
 import 'package:t_server/core/http_server/request/t_request.dart';
 
 extension MultipartFormExt on TRequest {
-  Future<TMultipartForm> multipart() async {
+  /// file upload
+  Future<TMultipartForm> multipartFile() async {
     final contentType = raw.headers.contentType;
 
     if (contentType == null || contentType.mimeType != 'multipart/form-data') {

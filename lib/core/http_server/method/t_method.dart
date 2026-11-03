@@ -1,14 +1,3 @@
-class NotFoundTMethodError extends Error {
-  final String inputMethod;
-
-  NotFoundTMethodError(this.inputMethod);
-
-  @override
-  String toString() {
-    return 'Unsupported HTTP method: $inputMethod';
-  }
-}
-
 enum TMethod {
   get,
   post,
@@ -32,5 +21,16 @@ enum TMethod {
     }
 
     return method;
+  }
+}
+
+class NotFoundTMethodError extends Error {
+  final String inputMethod;
+
+  NotFoundTMethodError(this.inputMethod);
+
+  @override
+  String toString() {
+    return 'Unsupported HTTP method: $inputMethod';
   }
 }
